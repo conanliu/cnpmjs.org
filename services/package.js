@@ -7,6 +7,7 @@ var Tag = models.Tag;
 var User = models.User;
 var Module = models.Module;
 var ModuleStar = models.ModuleStar;
+var ModuleSync = models.ModuleSync;
 var ModuleKeyword = models.ModuleKeyword;
 var PrivateModuleMaintainer = models.ModuleMaintainer;
 var ModuleDependency = models.ModuleDependency;
@@ -724,4 +725,35 @@ exports.saveUnpublishedModule = function* (name, pkg) {
 
 exports.getUnpublishedModule = function* (name) {
   return yield* ModuleUnpublished.findByName(name);
+};
+
+/**
+ *  获取模块的同步状态
+ * @param name
+ * @returns {*}
+ */
+exports.getModuleSyncStatus = function* (name) {
+  return yield* ModuleSync.getModuleSyncStatus(name);
+};
+
+/**
+ *  修改模块的同步状态
+ * @param name
+ * @param finished
+ * @returns {*}
+ */
+exports.addModuleSyncStatus = function* (name, finished) {
+  var row = yield* ModuleSync.getModuleSyncStatus(name);
+  if (!row) {
+    row = ModuleSync.build({
+      name: name
+    });
+  }
+
+  row.finished = finished;
+  row.last_sync_time = new Date();
+  if (row.changed()) {
+    yield row.save();
+  }
+  return row;
 };

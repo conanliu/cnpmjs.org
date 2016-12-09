@@ -33,6 +33,7 @@ var USER_AGENT = 'sync.cnpmjs.org/' + config.version +
 
 function SyncModuleWorker(options) {
   EventEmitter.call(this);
+  this.setMaxListeners(0); // 取消最大事件监听器限制
   this._logId = options.logId;
   this._log = '';
   this._loging = false;
@@ -178,6 +179,7 @@ SyncModuleWorker.prototype._doneOne = function* (concurrencyId, name, success) {
     this.pushFail(name);
   }
   delete this.syncingNames[name];
+  yield* packageService.addModuleSyncStatus(name, 1);
   var that = this;
   // relase the stack: https://github.com/cnpm/cnpmjs.org/issues/328
   defer.setImmediate(function* () {
@@ -474,6 +476,8 @@ SyncModuleWorker.prototype._sync = function* (name, pkg) {
     that.log('  [%s] publish on local cnpm registry, don\'t sync', name);
     return [];
   }
+
+  yield* packageService.addModuleSyncStatus(name, 0);
 
   hasModules = moduleRows.length > 0;
   var map = {};
@@ -1090,4 +1094,23 @@ SyncModuleWorker.sync = function* (name, username, options) {
   });
   worker.start();
   return result.id;
+};
+
+/**
+ * 检查包是否在同步
+ * @param name
+ * @returns {boolean}
+ */
+SyncModuleWorker.isSyncing = function* (name) {
+  var row = yield* packageService.getModuleSyncStatus(name);
+  if (!row) {
+    // start sync
+    var _log_id = yield* SyncModuleWorker.sync(name, 'sync-by-install');
+    debug('start sync %s, get log id %s', name, _log_id);
+
+    return true;
+  } else if (row && row.finished === 0) {
+    return true;
+  }
+  return false;
 };

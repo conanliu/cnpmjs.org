@@ -17,6 +17,14 @@ var config = require('../../../config');
 module.exports = function* list() {
   var orginalName = this.params.name || this.params[0];
   var name = orginalName;
+
+  // 判断当前模块是否在同步中，如果是，则走proxy
+  var syncing = yield* SyncModuleWorker.isSyncing(name);
+  if (syncing) {
+
+    return this.redirect(config.sourceNpmRegistry + this.url);
+  }
+
   var rs = yield [
     packageService.getModuleLastModified(name),
     packageService.listModuleTags(name)

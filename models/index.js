@@ -22,6 +22,7 @@ function load(name) {
 module.exports = {
   sequelize: sequelize,
   Module: load('module'),
+  ModuleSync: load('module_sync'),
   ModuleLog: load('module_log'),
   ModuleStar: load('module_star'),
   ModuleKeyword: load('module_keyword'),

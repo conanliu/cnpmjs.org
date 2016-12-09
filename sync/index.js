@@ -15,6 +15,7 @@ switch (config.syncModel) {
   case 'all':
     sync = require('./sync_all');
     break;
+  case 'cache':
   case 'exist':
     sync = require('./sync_exist');
     break;

@@ -86,6 +86,15 @@ CREATE TABLE IF NOT EXISTS `module` (
 -- show create table module\G
 -- ALTER TABLE  `module` CHANGE  `name`  `name` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT  'module name';
 
+CREATE TABLE IF NOT EXISTS `module_sync` (
+ `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'primary key',
+ `name` varchar(100) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'module name',
+ `finished` int(10) unsigned NOT NULL DEFAULT '0',
+ `last_sync_time` datetime NOT NULL COMMENT 'lasy sync time',
+ PRIMARY KEY (`id`),
+ UNIQUE KEY `name` (`name`),
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='module sync info';
+
 CREATE TABLE IF NOT EXISTS `module_log` (
  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'primary key',
  `gmt_create` datetime NOT NULL COMMENT 'create time',
